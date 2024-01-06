@@ -1,45 +1,12 @@
 # Kubernetes Pods
 
 ## Introduction
-Pods are the smallest deployable units in Kubernetes, representing one or more containers that share resources. This README provides essential commands and sample configurations to work with pods.
+Pods are the smallest deployable units in Kubernetes, representing one or more containers that share resources. This document provides essential commands and sample configurations to work with pods.
 
-## Useful Commands
-
-### Create a Pod
-To create a pod from a YAML configuration file:
-```bash
-kubectl create -f <pod.yaml>
-```
-
-### Get Pods
-To list all pods in a namespace:
-```bash
-kubectl get pods
-```
-
-### Describe a Pod
-To get detailed information about a specific pod:
-```bash
-kubectl describe pod <pod_name>
-```
-
-### Delete a Pod
-To delete a pod:
-```bash
-kubectl delete pod <pod_name>
-```
-
-### Get Logs
-To view logs from a pod:
-```bash
-kubectl logs <pod_name>
-```
-
-### Execute Commands in a Pod
-To execute commands in a running pod:
-```bash
-kubectl exec -it <pod_name> -- <command>
-```
+Since you shouldn’t run multiple processes in a single container, it’s evident you need
+another higher-level construct that allows you to run related processes together even when
+divided into multiple containers. These processes must be able to communicate with each
+other like processes in a normal computer. And that is why pods were introduced.
 
 ## Sample Configurations
 
@@ -78,7 +45,27 @@ spec:
 
 This YAML configuration demonstrates a pod named `env-pod` with a container that sets environment variables for connecting to a MySQL service.
 
-### Docker entrypoint and Kubernetes command
+## Init containers
+
+A pod manifest can specify a list of containers to run when the pod starts and before the
+pod’s normal containers are started. These containers are intended to initialize the pod and
+are appropriately called init containers. 
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+	name: kiada-init
+spec:
+  initContainers:
+    - name: init-demo
+      image: luksa/init-demo:0.1
+    - name: network-check
+      image: luksa/network-connectivity-checker:0.1
+containers:
+```
+
+
+## Docker entrypoint and Kubernetes command
 
 In Docker, the `ENTRYPOINT` and `CMD` directives serve distinct roles in defining container execution behavior. The `ENTRYPOINT` specifies the command to run when the container starts, serving as the fundamental executable for the container. Conversely, `CMD` specifies default arguments for the `ENTRYPOINT` or sets the default command when the `ENTRYPOINT` is not specified.
 
@@ -86,7 +73,7 @@ In Kubernetes, the command for a pod is defined within the pod's specification. 
 
 Understanding these differences is crucial for configuring container behaviors both at the Docker level and within the Kubernetes ecosystem, ensuring effective container orchestration.
 
-## Sample Dockerfile
+### Sample Dockerfile
 
 ```Dockerfile
 FROM ubuntu
@@ -97,7 +84,7 @@ CMD ["arg1", "arg2"]
 
 This Dockerfile uses an Ubuntu base image, copies a script named `script.sh` into the container, and sets it as the `ENTRYPOINT`. The `CMD` directive provides default arguments to the `ENTRYPOINT` script.
 
-## Sample Kubernetes Pod YAML Configuration
+### Sample Kubernetes Pod YAML Configuration
 
 ```yaml
 apiVersion: v1

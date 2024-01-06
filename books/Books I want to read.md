@@ -1,0 +1,15 @@
+
+- [ ] Atomic habits
+- [ ] Focus on what matters
+- [ ] Finish everything you start
+- [ ] Do it today
+- [ ] Deep work - Cal Newport
+- [ ] Attention Span - Gloria Mark
+- [ ] Time wise - Amantha Imber
+- [ ] Do epic shit
+- [ ] Do the hard thing first
+- [ ] Do the impossible
+- [ ] Człowiek w poszukiwaniu sensu
+- [ ] Koniec człowieczeństwa
+- [ ] Bracia Karamazow
+- [ ] Practical Female Psychology
