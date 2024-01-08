@@ -61,7 +61,7 @@ spec:
       image: luksa/init-demo:0.1
     - name: network-check
       image: luksa/network-connectivity-checker:0.1
-containers:
+  containers:
 ```
 
 
@@ -100,6 +100,18 @@ spec:
 ```
 
 This YAML defines a Kubernetes pod named `sample-pod` with a single container. The `command` field specifies the command to run, and the `args` field provides arguments to the command.
+
+### Pod Phases
+
+In any moment of the pod's lide, it's in one of the five phases: Pending, Running, Succeded, Failed, Unknown
+
+### Restart Policy
+
+| Restart Policy | Description |
+| ---- | ---- |
+| Always | Container is restarted regardless of the exit code the process terminated with. |
+| OnFailure | Container is restarted only if the process terminates with a non-zero exit code. |
+| Never | Container is never restarted |
 
 ## Useful Commands
 
@@ -228,3 +240,5 @@ This YAML defines a Kubernetes pod named `sample-pod` with a single container. T
     ```bash
     kubectl delete pods --all -n <namespace>
     ```
+## Related Topics
+[[Pods]] [[Config Maps]] [[Secrets]] [[Probes and hooks]] [[Security Context]] [[Service Account]] [[Taints And Tolerations]]
