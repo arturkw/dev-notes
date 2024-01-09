@@ -8,4 +8,5 @@
 - [Service Account](./Service%20Account.md)
 - [Taints And Tolerations](./Taints%20And%20Tolerations.md)
 - [Node Affinity](./Node%20Affinity.md)
+- [Storage Volumes](./Storage%20Volumes)
 

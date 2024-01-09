@@ -241,4 +241,4 @@ In any moment of the pod's lide, it's in one of the five phases: Pending, Runnin
     kubectl delete pods --all -n <namespace>
     ```
 ## Related Topics
-[[Pods]] [[Config Maps]] [[Secrets]] [[Probes and hooks]] [[Security Context]] [[Service Account]] [[Taints And Tolerations]]
+[[Pods]] [[Config Maps]] [[Secrets]] [[Probes and hooks]] [[Security Context]] [[Service Account]] [[Taints And Tolerations]] [[Storage volumes]]
