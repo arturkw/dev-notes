@@ -46,3 +46,4 @@ In this sample configuration:
 - Defines a pod with a container named `app-container`.
 - Uses a volume named `shared-data`, mounted at the path `/data`.
 - Employs the `EmptyDir` volume type for sharing data between containers in the pod.
+[[PV and PVC]]

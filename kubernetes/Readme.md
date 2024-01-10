@@ -9,4 +9,5 @@
 - [Taints And Tolerations](./Taints%20And%20Tolerations.md)
 - [Node Affinity](./Node%20Affinity.md)
 - [Storage Volumes](./Storage%20Volumes)
+- [PV and PVC](./PV%20and%20PVC)
 
