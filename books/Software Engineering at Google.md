@@ -21,4 +21,27 @@
 7. Organizational culture is an uncertain matter involving people, something many companies treat as an add-on. In Google, there's a belief that focusing first on culture and the environment yields better results than solely concentrating on the outcome of such an environment.
 8. Canonical sources of information are centralized collections of information across the entire company, providing a method for standardizing and disseminating expert knowledge.
 
+## How to Lead a Team?
+
+1. At Google, it was decided that managers overseeing software engineering should have an engineering background. This means either hiring experienced engineers to become managers or providing training for those already employed.
+2. Above all, resist the temptation to micromanage.
+3. If your employees are so disinterested in their work that they actually need a traditional manager to act as a caretaker, convincing them to do their job, it means you have a serious problem.
+4. Antipatterns:
+   - Hiring naive individuals: It's much easier to expand your skills when surrounded by people smarter than you.
+   - Ignoring underperformers: Hoping for improvement is not a strategy. Ignoring low-performing individuals discourages high-performers from joining the team and encourages them to leave.
+   - Ignoring human issues
+   - Lowering the hiring bar: The cost of finding the right person (recruitment, advertising, time) is much lower than the cost of hiring the wrong person.
+5. Positive patterns:
+   - Let go of ego
+   - Be a Zen master: Calmness is crucial, asking questions is a way to find solutions.
+   - Be a catalyst
+   - Remove obstacles
+   - Set clear goals
+   - Be honest
+   - Monitor satisfaction levels
+   - Delegate but work intensively
+   - Look for your successor
+   - Protect the team from chaos
+   - Let the team know when they are doing well
+   - Pay attention to focus, direction, and speed issues
 
