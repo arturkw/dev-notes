@@ -45,3 +45,21 @@
    - Let the team know when they are doing well
    - Pay attention to focus, direction, and speed issues
 
+## Performance Measurement
+Before conducting a measurement, ask if the result could impact operations regardless of whether it's positive or negative. If you can't take any action based on the result, it probably doesn't make sense to conduct the measurement.
+
+## Code Review
+
+Benefits of code inspection:
+- Code correctness
+- Code clarity
+- Code consistency
+- Knowledge sharing
+
+Best practices for code inspection:
+- Be polite and professional
+- Make minor changes
+- Provide good descriptions of changes
+- Limit the number of people conducting the code review to a minimum
+- Code review improves code correctness, understanding, and consistency
+- Allows for validation of one's assumptions by someone else
