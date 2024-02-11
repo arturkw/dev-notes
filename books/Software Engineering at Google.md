@@ -63,3 +63,22 @@ Best practices for code inspection:
 - Limit the number of people conducting the code review to a minimum
 - Code review improves code correctness, understanding, and consistency
 - Allows for validation of one's assumptions by someone else
+
+## Testing
+
+Types of tests according to Google:
+- Small tests - tests run in a single thread
+- Medium tests - tests run by multiple threads on a single server
+- Large tests - tests that can span across multiple computers
+
+Best practices:
+- Aim for consistent tests (changing the code shouldn't change the test)
+- Focus on testing public APIs
+- Test state, not interactions
+- Ensure completeness and conciseness of tests
+- Test behaviors, not methods (one test for one behavior, multiple tests for one method)
+- Use names that reflect the behaviors being tested
+- Avoid placing logic in tests
+- Create clear error messages
+
+

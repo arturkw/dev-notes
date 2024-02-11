@@ -7,6 +7,7 @@ Streams aggregations (aggregate, count, reduce)
 Streams joins, co-partitioning
 Stream Windowing
 Stream vs Tables
-
-
- 
+KStream, KTable, GlobalKTable
+Apache Avro, schema registry
+Kafka Connect
+KSQL 
