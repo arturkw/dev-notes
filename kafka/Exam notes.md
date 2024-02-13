@@ -4,8 +4,10 @@
 - Confluent REST Proxy natively supports various data formats.
 
 ## Topic Log Compaction
-- After cleanup, only one message per key is retained with the latest value.
+- After cleanup, only one message per key is retained with the latest value. At least last update for each message key is retained.
 - Log compaction is evaluated every time a segment is closed.
+- Tombstone record is a record with `null` payload. It is a marker for record deletion
+- log compaction is enabled via `log.cleanup.policy=compact` Default is `delete` - old segments will be discarded when their retention time or size has been reached
 
 ## Topic Metrics
 - `records-lag-max`: Current lag (number of messages behind the broker).
@@ -19,11 +21,20 @@
 - Schema registry resides as a separate JVM component.
 
 ## Streams
+- User topics: created manually. Do not rely on auto-creation (may be disabled, default settings may not be what you want)
 - Internal topics are prefixed by `application.id`.
 
 ## Zookeeper
+- used to store persistent cluster metadata
 - Majority for Zookeeper ensemble `ensemble`.
+- default client port: `2181`
+- `ensemble` is a multiple nodes Zookeeper deployment. It  is a set of `2n + 1` nodes.
+- Number `QN = (N + 1) / 2` defines the size of `quorum` (majority rule) where `n` is the total number of servers.  `Quorum` is minimal number of server required to run the Zookeeper
 
+## KRaft
+ - ZooKeeper is a separate system which makes deploying Kafka more complicated for system administrators
+ - Metadata failover is near-instantaneous with KRaft
+ 
 ## Sending Messages with Null
 - Value: Message is deleted.
 - Key: Stored with round-robin algorithm.
@@ -31,8 +42,10 @@
 ## Finding Partitions without Leader
 - Command: `kafka-topics.sh --zookeeper localhost:2181 --describe --unavailable-partitions`.
 
-## High Watermark
-- Definition of high watermark.
+## High Water Mark
+- HWM is the offset value of the last message that has been successfully replicated to all replicas of a partition.
+- Is maintained by the leader replica of a partition
+- Is used by consumer to detetmine the latest available message
 
 ## Controller
 - Elected by Zookeeper ensemble.
