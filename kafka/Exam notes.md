@@ -1,59 +1,80 @@
-1. Data formats natively available with Confluent REST Proxy
-2. Topic log compaction:
- - after cleanup, only one message per key is retained with the latest value
- - how often log compaction is evaluated: every time a segment is closed
-3. Topic metrics:
- - records-lag-max - this metric shows the current lag (number of messages behind the broker)
- 4. Java API
- - what is returned by a `producer.send()`: `Future<RecordMetadata>`
-5. Avro
-- `SpecificRecords` are generated from `Avro Schema` and `Maven/Gradle` plugin
-- `forward`, `backward`, `breaking` schema evolutions
-- schema registry resides as a separate JVM component
-1. Streams
-- internal topics are prefixed by `application.id`
-2. Zookeeper
-- majority for Zookeper ensamble `ensamble`
-3. Sending a message with `null` as:
--  value: message is deleted 
-- key: will be stored with round-robin algorithm
-4. How to find all partitions without leader: `kafka-topics.sh --zookeeper localhost:2181 --describe --unavailable-partitions`
-5. What is a `high watermark`
-6. Controller:
-- is elected by Zookeeper ensemble
-- is responsible for partition leader election
-7. Consumer group
-- explain `group.id`
-8. Callback is invoked when a broken response is received.
-9. Partition rebalance for a consumer group is triggered by:
-- a consumer in a consumer group shuts down
-- add a new consumer to consumer group
-- increase partitions of a topic
-10. Increasing the number of partition causes new messages keys to get hashed differently, and breaks the guarantee "same keys goes to the same partition". Kafka logs are immutable and the previous messages are not re-shuffled
-11. Kafka creates topic automatically when:
-- `auto.create.topics=true`
-- producer sends message to a topic
-- consumer reads message from a topic
-- client requests metadata for a topic
-12. How does a consumer commit offsets in Kafka: consumers do not directly write to `__consumer_offsets` topic. They instead interact with a broker that has been elected to manag that topic, which is a `Group Coordinator` broker
-13. To transform data from a Kafka topic to another one Kafkta Streams should be used.
-14. To stop consumer gracefully: call `consumer.wakeUp()` and try-catch `WakeUpException`
-15. Kafka Streams joins that are always windowed joins: `KStream-KStream` join
-16. `At-most-once`, `Exactly-once`, `At-least-once`
-17. `GlobalKtable`, co-partition
+# Kafka Cheat Sheet
 
+## Data Formats with Confluent REST Proxy
+- Confluent REST Proxy natively supports various data formats.
 
+## Topic Log Compaction
+- After cleanup, only one message per key is retained with the latest value.
+- Log compaction is evaluated every time a segment is closed.
 
+## Topic Metrics
+- `records-lag-max`: Current lag (number of messages behind the broker).
 
+## Java API
+- `producer.send()`: Returns `Future<RecordMetadata>`.
 
+## Avro
+- `SpecificRecords` are generated from Avro Schema using Maven/Gradle plugin.
+- Schema evolution: `forward`, `backward`, `breaking.
+- Schema registry resides as a separate JVM component.
 
+## Streams
+- Internal topics are prefixed by `application.id`.
 
+## Zookeeper
+- Majority for Zookeeper ensemble `ensemble`.
 
+## Sending Messages with Null
+- Value: Message is deleted.
+- Key: Stored with round-robin algorithm.
 
-Config parameters:
+## Finding Partitions without Leader
+- Command: `kafka-topics.sh --zookeeper localhost:2181 --describe --unavailable-partitions`.
+
+## High Watermark
+- Definition of high watermark.
+
+## Controller
+- Elected by Zookeeper ensemble.
+- Responsible for partition leader election.
+
+## Consumer Group
+- Explanation of `group.id`.
+
+## Callback for Broken Response
+- Invoked when a broken response is received.
+
+## Partition Rebalance
+- Triggered by events like consumer shutdown, new consumer addition, or increasing partitions of a topic.
+
+## Partition Hashing
+- Increasing partitions causes new message keys to be hashed differently.
+
+## Automatic Topic Creation
+- Kafka creates topics automatically under certain conditions.
+
+## Offset Committing
+- Explanation of how consumers commit offsets.
+
+## Data Transformation with Kafka Streams
+- Usage of Kafka Streams for data transformation.
+
+## Graceful Consumer Shutdown
+- Steps for stopping a consumer gracefully.
+
+## Kafka Streams Joins
+- Description of windowed joins.
+
+## Message Delivery Guarantees
+- Explanation of different delivery guarantees.
+
+## GlobalKtable
+- Definition of GlobalKtable and co-partitioning.
+
+## Configuration Parameters
 1. `log.cleanup.policy`
 2. `auto.offset.rest`
-3. `max.tasks` for Kafa Connect
-4. `key.converter.schemas.enable` and `value.converter.schemas.enable`
-5. `enable.idempotence`
-6. `log.retention.hours`, `log.retention.minutes`, `log.retention.ms`
+3. `max.tasks` for Kafka Connect.
+4. `key.converter.schemas.enable` and `value.converter.schemas.enable`.
+5. `enable.idempotence`.
+6. `log.retention.hours`, `log.retention.minutes`, `log.retention.ms`.
