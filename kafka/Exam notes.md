@@ -1,7 +1,8 @@
 # Kafka Cheat Sheet
 
 ## Data Formats with Confluent REST Proxy
-- Confluent REST Proxy natively supports various data formats.
+- Confluent REST Proxy natively supports various data formats. Which one?
+- Production **Kafka** deployment should be run `XFS` or `ext4`
 
 ## Topic
 - consumer of a given topic-partition will always read that partition's events in exactly the same order as they were written
@@ -38,6 +39,10 @@
 - primitive types: `bytes`, `string`, `null`, `boolean`, `int`, `long`, `float`, `double`
 - required fields: `fields`, `name`
 - following message schema formats are supported: `JSON`, `Avro`, `ProtoBuf`
+- Schema Registry schemas are stored in the **__schemas** topic
+
+## Schemas compatibility types
+- `FORWARD` or `FORWARD_TRANSITIVE` schema evolution: There is no assurance that consumers using the new schema can read data produced using older schemas.
 
 ## Consumer
 - when a `consumer` wants to join a group, it sends a `JoinGroup` request to the `group coordinator` 
@@ -48,6 +53,14 @@
 - consumer is configured to `auto-commit offsets` by default
 - it is possible to manually assign specific partition `assign(Collection)`
 - it is possible to specify the position using `seek(TopicPartition, long)`
+- Produce and consume requests can only be sent to the node hosting **partition leader**.
+- In case the consumer has the wrong leader of a partition, it will issue a **metadata request**.
+- parameter `auto.offset.reset` has following parameters:
+	- **earliest:** Automatically reset the offset to the earliest offset.
+	- **latest:** Automatically reset the offset to the latest offset.
+	- **none:** Throw exception to the consumer if no previous offset is found for the consumer's group.
+	- **anything else:** Throw exception to the consumer.
+- `consumer offset` is stored in topic **__consumer_offsers** 
 
 ## Producers
 - `acks`
@@ -70,12 +83,24 @@
 - to produce messages with key-value delimeters set properties: `--property parse.key && --property key.separator`
 - non-retriable callback exceptions: `InvalidTopicException`, `OffsetMetadataTooLargeException`, `RecordBatchTooLargeException`, `RecordTooLargeException`, `UnknownServerException`
 - retriable exceptions: `CorruptRecordException`, `InvalidMetadataException`, `NotEnoughReplicasAfterAppendException`, `NotEnoughReplicasException`, `OffsetOutOfRangeException`, `TimeoutException`, `UnknownTopicOrPartitionException`
+- **Producer configurations** to achieve a high throughput application are:
+	- **compression.type:** Producers usually send data that is text-based, for example with JSON data. In this case, it is important to apply compression to optimize for throughput. Compression is more effective the bigger the batch of messages being sent to Kafka. Possible values are: `lz4` (recommended for performance),`snappy`, `zstd`, `gzip`.
+	- **batch.size:** With batching strategy of Kafka producers, you can batch messages going to the same partition, which means they collect multiple messages to send together in a single request. The most important step you can take to **optimize throughput** is to tune the producer batching to increase the batch size and the time spent waiting for the batch to populate with messages. Larger batch sizes result in fewer requests, which reduces load on producers and the broker CPU overhead to process each request.
+	- **linger.ms:** It's the number of milliseconds a producer is willing to wait before sending a batch out (defaults to 0). By introducing some lag, we increase the changes of messages being sent together in a batch. If the batch is full (batch.size) before the end of linger.ms period, it will be sent to Kafka right away.
+
+
 ## Streams
 - User topics: created manually. Do not rely on auto-creation (may be disabled, default settings may not be what you want)
 - Internal topics are prefixed by `application.id`.
 - It is crucial to close each `iterator`. Failure to close an `iterator` can lead to `Out-Of-Memory` issues.
 - `Streams` scales by allowing multiple thread of executions within one instance  of the application and by supporting load balancing between distributed instances
 - `Stream` engine parallelizes execution of a topology by splitting it into tasks. Number of tasks depends on the number of partitions. Each task is responsible for a subset of the partitions
+
+## Joins
+- When joining streams or tables input data **must be co-partitioned**. This ensures that input records with the same key, from both sides of the join, are delivered to the same stream task during processing. **It is the responsibility of the user to ensure data co-partitioning when joining**.
+- **The requirements for data co-partitioning are:**
+	 - The input topics of the join (left side and right side) must have the **same number of partitions**.
+	- All applications that write to the input topics must have the **same partitioning strategy** so that records with the same key are delivered to same partition number.
 
 ## Confluent Control Center
 `CCC` is a self-hosted GUI with dashboards to centrilized management and monitoring of key components of the platform, including clusters, brokers, schemas, topics, messages, connectors, ksqlDB queries, security, replication and more
@@ -104,16 +129,22 @@
 - each `zNode` can be watched for changes
 - responsible for broker registration with heartbeat mechanism
 - elects leader in case some brokers go down
+- stores data like: `ACL`, broker registration information, controller registration
 
 ## KRaft
  - ZooKeeper is a separate system which makes deploying Kafka more complicated for system administrators
  - Metadata failover is near-instantaneous with KRaft
+
+## Kafka Controller
+- In a `Kafka cluster`, **one (and only one)** of the brokers serves as the `controller`, which is responsible for managing the states of partitions and replicas and for performing administrative tasks like **reassigning partitions**. The election of that broker happens thanks to `Zookeeper`.
+- `Kafka Controller` registers handlers to be notified about changes in Zookeeper and propagate them across brokers in a Kafka cluster.
 
 ## Kafka Connect
 - by default any error encountered during conversion or transformation will cause connector to fail
 - connector configuration can also enable tolerating such errors by skipping them
 - it is possible to report errors to `dead letter queue`. Use `errors.deadletterqueue.topic.name` and optionally `errors.deadletterqueue.context.headers.enable=true`
 - Kafka Connect can provide `exactly-once semantics` for both sink connectors and source connectors, but achieving this support requires configuring the correct worker properties in the cluster. The ability to achieve exactly-once semantics is highly dependent on the type of connector and its design. Connectors must be designed to take advantage of the capabilities of the Kafka Connect framework for exactly-once processing.
+- **Kafka Connect** supports two modes of execution: **standalone (single process)** and **distributed**. In standalone mode, all work is performed in a single process, making it simpler to set up. However, standalone mode lacks some features such as fault tolerance.
 - Distributed vs Standalone mode??
 
 ## Kafka CLI commands
@@ -143,6 +174,7 @@
 - `SHOW STREAMS` and `EXPLAIN <query>` statements do not interact with KAfkaa but directly communicate with `ksqlDB` server. 
 - `ksqlDB` supports exactly-once processing - see `processing.guarantees` setting
 - when running a query against `topic` with multiple partitions, only the `ksqlDB` servers corresponding to the number of partitions perform the work, while the idle servers have minimal resource impact
+- `ksqlDB` has a limitation in that it **doesn't support structured keys**, preventing the creation of a stream from a windowed aggregate
 
 ## Controller
 - Elected by Zookeeper ensemble.
@@ -195,3 +227,4 @@
 5. `enable.idempotence`.
 6. `log.retention.hours`, `log.retention.minutes`, `log.retention.ms`.
 7. `errors.log.enable`, `errors.deadletterqueue.topic.name`, `errors.deadletterqueue.context.headers.enable`
+8. The `offsets.retention.minutes` configuration in `Kafka` determines how long `Kafka` remembers offsets in a special topic. The default value is 10,080 minutes (7 days), and it affects the behavior when an application is restarted after being stopped for a while. Increasing this value is **recommended** to avoid reprocessing data on application restart due to offsets being deleted by the broker(s).
