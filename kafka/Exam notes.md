@@ -3,6 +3,14 @@
 ## Data Formats with Confluent REST Proxy
 - Confluent REST Proxy natively supports various data formats.
 
+## Topic
+- consumer of a given topic-partition will always read that partition's events in exactly the same order as they were written
+- partitions do not need to have the same number of messages
+- offsets only have a meaning for a specific partition
+- messages are kept only for a limited time (one week by default)
+- once the data is written to a partition, it can't be changed
+- data is assigned randomly to a partition unless a key is provided
+- messages in partition are segregated into multiple segments to ease finding a message by its offset. Each segment is composed of the following indexes: `offset to position index` that allows Kafka to find the starting position of a message and `timestamp to offset index` that allows Kafka to find messages for a timestamp
 ## Topic Log Compaction
 - After cleanup, only one message per key is retained with the latest value. At least last update for each message key is retained.
 - Log compaction is evaluated every time a segment is closed.
@@ -25,9 +33,11 @@
 
 ## Avro
 - `SpecificRecords` are generated from Avro Schema using Maven/Gradle plugin.
-- Schema evolution: `forward`, `backward`, `breaking.
+- Schema evolution: `forward`, `backward`, `breaking ??
 - Schema registry resides as a separate JVM component.
 - primitive types: `bytes`, `string`, `null`, `boolean`, `int`, `long`, `float`, `double`
+- required fields: `fields`, `name`
+- following message schema formats are supported: `JSON`, `Avro`, `ProtoBuf`
 
 ## Consumer
 - when a `consumer` wants to join a group, it sends a `JoinGroup` request to the `group coordinator` 
@@ -35,6 +45,31 @@
 - `group leader` receives a list of all consumers in the group from the group coordinator and is responsible for assigning a subset of partitions to each consumer
 - `RangeAssignor` assignment strategy
 - `RoundRobinAssignor` assignment strategy
+- consumer is configured to `auto-commit offsets` by default
+- it is possible to manually assign specific partition `assign(Collection)`
+- it is possible to specify the position using `seek(TopicPartition, long)`
+
+## Producers
+- `acks`
+	 - default `ack` is `all`
+	 - `0` maximizes throughput, but you will have no guarantee that the message was successfully written to the broker’s log since the broker does not send a response.
+	 - `1` ack is required from partition leader only
+	 - `all` guarantees that not only will the partition leader accept the write, but it will be successfully replicated to all of the in-sync replicas
+- no need for `group coordination`
+- automatically know to which broker and partition to write to
+- producer partitioner maps each message to a topic partition, and the producer sends a produce request to the `leader of that partition`
+- partitioner guarantee that all messages with the same non-empty key will be sent to the same partition
+- data without key will be send round-robin to all available brokers
+- producer can choose to receive ack of data writes
+- most important configs for producer are: `acks`, `batch size`, `compression`
+- when `retries` greater than `0` (default) then message reordering may occur since the retry may occur after a following write succeeded. To enable retries without reordering, you can set `max.in.flight.requests.per.connection` to `1` to ensure that only one request can be sent to the broker at a time.
+- `batch.size` - maximum size in bytes of each message batch
+- To give more time for batches to fill, you can use `linger.ms`
+- Compression can be enabled with the `compression.type: none, gzip, znappy, 1z4, zstd'
+- If a `Kafka producer` produces messages faster than the broker can take, the records will be buffered in memory. The default buffer memory is 33554432 bytes (32 MB). The buffer will full up over time and fill back down when the throughput of the broker increases. If the buffer is full, then the **.send()** method will start to block and won't return right away. The configuration "**max.block.ms**" is the time the **.send()** method will block before throwing an exception. If an exception is thrown this usually means the brokers are down and cannot process any data.
+- to produce messages with key-value delimeters set properties: `--property parse.key && --property key.separator`
+- non-retriable callback exceptions: `InvalidTopicException`, `OffsetMetadataTooLargeException`, `RecordBatchTooLargeException`, `RecordTooLargeException`, `UnknownServerException`
+- retriable exceptions: `CorruptRecordException`, `InvalidMetadataException`, `NotEnoughReplicasAfterAppendException`, `NotEnoughReplicasException`, `OffsetOutOfRangeException`, `TimeoutException`, `UnknownTopicOrPartitionException`
 ## Streams
 - User topics: created manually. Do not rely on auto-creation (may be disabled, default settings may not be what you want)
 - Internal topics are prefixed by `application.id`.
@@ -44,6 +79,11 @@
 
 ## Confluent Control Center
 `CCC` is a self-hosted GUI with dashboards to centrilized management and monitoring of key components of the platform, including clusters, brokers, schemas, topics, messages, connectors, ksqlDB queries, security, replication and more
+
+## Confluent Schema Registry
+- `Confluent Schema Registry` allows evolution of schemas according to the configured settings and expanded support for these schema types
+- `Confluent Schema Registry` is a distributed storage layer for schemas which uses Kafka as its underlying storage mechanism
+- `Confluent Schema Registry` provides a serving layer for your metadata. It provides a RESTful interface for storing and retrieving your **Avro**, **JSON** Schema, and **Protobuf** schemas.
 
 ## Message Delivery Guarantees
 - `At-most once` - message loss is possible if the producer doesn't retry on failures
@@ -62,6 +102,8 @@
 - each `zNode` can store data
 - you can not rename a `zNode`
 - each `zNode` can be watched for changes
+- responsible for broker registration with heartbeat mechanism
+- elects leader in case some brokers go down
 
 ## KRaft
  - ZooKeeper is a separate system which makes deploying Kafka more complicated for system administrators
@@ -71,8 +113,16 @@
 - by default any error encountered during conversion or transformation will cause connector to fail
 - connector configuration can also enable tolerating such errors by skipping them
 - it is possible to report errors to `dead letter queue`. Use `errors.deadletterqueue.topic.name` and optionally `errors.deadletterqueue.context.headers.enable=true`
+- Kafka Connect can provide `exactly-once semantics` for both sink connectors and source connectors, but achieving this support requires configuring the correct worker properties in the cluster. The ability to achieve exactly-once semantics is highly dependent on the type of connector and its design. Connectors must be designed to take advantage of the capabilities of the Kafka Connect framework for exactly-once processing.
 - Distributed vs Standalone mode??
- 
+
+## Kafka CLI commands
+- kafka-topics.sh
+	- **--topics-with-overrides:** If set when describing topics, only show topics that have overridden configs.
+	- **--unavailable-partitions:** If set when describing topics, only show partitions whose **leader is not available**.
+	- **--under-min-isr-partitions:** If set when describing topics, only show partitions whose ISR count is less than the configured minimum.
+	- **--under-replicated-partitions:** If set when describing topics, only show under replicated partitions.
+
 ## Sending Messages with Null
 - Value: Message is deleted.
 - Key: Stored with round-robin algorithm.
@@ -92,11 +142,18 @@
 - `DESCRIBE EXTENDED` is used to provide detailed information about a stream or table, including the serialization format. 
 - `SHOW STREAMS` and `EXPLAIN <query>` statements do not interact with KAfkaa but directly communicate with `ksqlDB` server. 
 - `ksqlDB` supports exactly-once processing - see `processing.guarantees` setting
+- when running a query against `topic` with multiple partitions, only the `ksqlDB` servers corresponding to the number of partitions perform the work, while the idle servers have minimal resource impact
 
 ## Controller
 - Elected by Zookeeper ensemble.
 - Responsible for partition leader election.
 
+## Security
+- `Zero Copy Data Transfer` consist on removing the second and third data copies, making the data being transfered directly from the read buffer to the socket buffer. This feature is disabled when `SSL` is enabled.
+- security protocol of each listener is defined in the `listener.security.protocol.map` configuration. Possible options are `PLAINTEXT`, `SSL`, `SASL_PLAINTEXT`, `SASL_SSL`
+- to connect to a Kafka cluster over SSL you set `security.protocol=SSL`
+- available auth. mchanisms: `mTLS`, `HTTP Basic Auth`, `SASL/PLAIN` 
+- `ACL` is used for authorization, not for authentication!
 ## Consumer Group
 - Explanation of `group.id`.
 
@@ -138,4 +195,3 @@
 5. `enable.idempotence`.
 6. `log.retention.hours`, `log.retention.minutes`, `log.retention.ms`.
 7. `errors.log.enable`, `errors.deadletterqueue.topic.name`, `errors.deadletterqueue.context.headers.enable`
-9. 
