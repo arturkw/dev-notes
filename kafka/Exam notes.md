@@ -21,6 +21,10 @@
 ## Metrics
 - `records-lag-max`: Current lag (number of messages behind the broker)
 - `UnderReplicatedPartitions` means that data is not being replicated to enough number of brokers
+- `request-latency-avg` ???
+- `response-rate` measures the number of acknowledgments per second
+- `io-wait-time-ns-avg`
+- `records-consumed-rate`
 
 ## Java API
 - `producer.send()`: Returns `Future<RecordMetadata>`.
@@ -33,6 +37,7 @@
 - `Session window` - session based, dynamically-sized, non-overlapping, data-drven windows
 
 ## Avro
+- Avro provides a language for defining schemas and using them to serialize and deserialize data.
 - `SpecificRecords` are generated from Avro Schema using Maven/Gradle plugin.
 - Schema evolution: `forward`, `backward`, `breaking ??
 - Schema registry resides as a separate JVM component.
@@ -87,7 +92,9 @@
 	- **compression.type:** Producers usually send data that is text-based, for example with JSON data. In this case, it is important to apply compression to optimize for throughput. Compression is more effective the bigger the batch of messages being sent to Kafka. Possible values are: `lz4` (recommended for performance),`snappy`, `zstd`, `gzip`.
 	- **batch.size:** With batching strategy of Kafka producers, you can batch messages going to the same partition, which means they collect multiple messages to send together in a single request. The most important step you can take to **optimize throughput** is to tune the producer batching to increase the batch size and the time spent waiting for the batch to populate with messages. Larger batch sizes result in fewer requests, which reduces load on producers and the broker CPU overhead to process each request.
 	- **linger.ms:** It's the number of milliseconds a producer is willing to wait before sending a batch out (defaults to 0). By introducing some lag, we increase the changes of messages being sent together in a batch. If the batch is full (batch.size) before the end of linger.ms period, it will be sent to Kafka right away.
-
+- to prevent records from being committed to the log in a different order than the order in which the producer intended to send them:
+	- set `max.in.flight.requests.per.connection=1`
+	- set `retries` to 0
 
 ## Streams
 - User topics: created manually. Do not rely on auto-creation (may be disabled, default settings may not be what you want)
@@ -95,13 +102,17 @@
 - It is crucial to close each `iterator`. Failure to close an `iterator` can lead to `Out-Of-Memory` issues.
 - `Streams` scales by allowing multiple thread of executions within one instance  of the application and by supporting load balancing between distributed instances
 - `Stream` engine parallelizes execution of a topology by splitting it into tasks. Number of tasks depends on the number of partitions. Each task is responsible for a subset of the partitions
+- To split a stream into different branches use `split()` method. Method `branch()` is deprecated. 
+- method `to` send the output to the specified topic: `stream.to("output_topic")`
+- to combine two streams into one stream `merge` transformation should be used
 
 ## Joins
 - When joining streams or tables input data **must be co-partitioned**. This ensures that input records with the same key, from both sides of the join, are delivered to the same stream task during processing. **It is the responsibility of the user to ensure data co-partitioning when joining**.
 - **The requirements for data co-partitioning are:**
 	 - The input topics of the join (left side and right side) must have the **same number of partitions**.
 	- All applications that write to the input topics must have the **same partitioning strategy** so that records with the same key are delivered to same partition number.
-
+- You are performing a join, and you only want to join two records if their timestamps are within five minutes of one another. Which windowing strategy should you use? Sliding Time Windows are used for joins and are tied to the timestamps of records.
+- You have a topic containing records of each click on your website. Which windowing strategy would you use to dynamically create windows for an aggregation around click activity, with no windows created when there are no clicks? Session Windows are dynamically managed based upon record activity.
 ## Confluent Control Center
 `CCC` is a self-hosted GUI with dashboards to centrilized management and monitoring of key components of the platform, including clusters, brokers, schemas, topics, messages, connectors, ksqlDB queries, security, replication and more
 
@@ -131,6 +142,9 @@
 - elects leader in case some brokers go down
 - stores data like: `ACL`, broker registration information, controller registration
 
+## Kafka Cluster
+Kafka Broker configurations such as `background.threads` can be updated in such a way that will automatically roll out the change to the entire cluster, without requiring broker restarts. Cluster-wide configurations can be updated dynamically across the whole cluster.
+
 ## KRaft
  - ZooKeeper is a separate system which makes deploying Kafka more complicated for system administrators
  - Metadata failover is near-instantaneous with KRaft
@@ -153,6 +167,8 @@
 	- **--unavailable-partitions:** If set when describing topics, only show partitions whose **leader is not available**.
 	- **--under-min-isr-partitions:** If set when describing topics, only show partitions whose ISR count is less than the configured minimum.
 	- **--under-replicated-partitions:** If set when describing topics, only show under replicated partitions.
+- to list all topics use command `./bin/kafka-topics.sh --bootstrap-server localhost:9092 --list`
+- `kafka-acls --authorizer-properties zookeeper.connect=localhost:2181 --add --allow-principal User:kafkauser --operation read --topic pageviews` - allow the user `kafkauser` to read from, but not to write to `pageviews` topic
 
 ## Sending Messages with Null
 - Value: Message is deleted.
@@ -186,6 +202,11 @@
 - to connect to a Kafka cluster over SSL you set `security.protocol=SSL`
 - available auth. mchanisms: `mTLS`, `HTTP Basic Auth`, `SASL/PLAIN` 
 - `ACL` is used for authorization, not for authentication!
+
+## Testing
+- `ConsumerRecordFactory` converts test data into the format accepted by `TopologyTestDriver`
+- `MockProducer` would allow you to simulate the interactions between your code and KafkaProducer.
+
 ## Consumer Group
 - Explanation of `group.id`.
 
@@ -228,3 +249,5 @@
 6. `log.retention.hours`, `log.retention.minutes`, `log.retention.ms`.
 7. `errors.log.enable`, `errors.deadletterqueue.topic.name`, `errors.deadletterqueue.context.headers.enable`
 8. The `offsets.retention.minutes` configuration in `Kafka` determines how long `Kafka` remembers offsets in a special topic. The default value is 10,080 minutes (7 days), and it affects the behavior when an application is restarted after being stopped for a while. Increasing this value is **recommended** to avoid reprocessing data on application restart due to offsets being deleted by the broker(s).
+9. `unclean.leader.election.enable=false` unclear leader election is disabled, the topic will not accept new messages until an **In-Sync Replica** becomes available for leader election. 
+10. `unclean.leader.election.enable=true` one of the out-of sync replicas can be elected as a new leader.
