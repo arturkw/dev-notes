@@ -21,6 +21,7 @@
 ## Metrics
 - `records-lag-max`: Current lag (number of messages behind the broker)
 - `UnderReplicatedPartitions` means that data is not being replicated to enough number of brokers
+- `bytes-consumed-rate` average number of bytes per second
 - `request-latency-avg` ???
 - `response-rate` measures the number of acknowledgments per second
 - `io-wait-time-ns-avg`
@@ -45,6 +46,7 @@
 - required fields: `fields`, `name`
 - following message schema formats are supported: `JSON`, `Avro`, `ProtoBuf`
 - Schema Registry schemas are stored in the **__schemas** topic
+- set serialization format by setting `ksql.format=avro,protobuff,json`
 
 ## Schemas compatibility types
 - `FORWARD` or `FORWARD_TRANSITIVE` schema evolution: There is no assurance that consumers using the new schema can read data produced using older schemas.
@@ -66,6 +68,7 @@
 	- **none:** Throw exception to the consumer if no previous offset is found for the consumer's group.
 	- **anything else:** Throw exception to the consumer.
 - `consumer offset` is stored in topic **__consumer_offsers** 
+- consumer is not threadsafe
 
 ## Producers
 - `acks`
@@ -95,6 +98,11 @@
 - to prevent records from being committed to the log in a different order than the order in which the producer intended to send them:
 	- set `max.in.flight.requests.per.connection=1`
 	- set `retries` to 0
+- methods of sending messages:
+	- fire and forget - we do not really care if it arrives successfully or not
+	- synchronous send, **send()** methods returns a **Future** object and we use **get()** to wait on the future 
+	- asynchronous - **send()** with a callback function
+- producer is thread-safe
 
 ## Streams
 - User topics: created manually. Do not rely on auto-creation (may be disabled, default settings may not be what you want)
@@ -111,6 +119,7 @@
 - **The requirements for data co-partitioning are:**
 	 - The input topics of the join (left side and right side) must have the **same number of partitions**.
 	- All applications that write to the input topics must have the **same partitioning strategy** so that records with the same key are delivered to same partition number.
+	- `GlobalKTable` do not require data co-partitioning
 - You are performing a join, and you only want to join two records if their timestamps are within five minutes of one another. Which windowing strategy should you use? Sliding Time Windows are used for joins and are tied to the timestamps of records.
 - You have a topic containing records of each click on your website. Which windowing strategy would you use to dynamically create windows for an aggregation around click activity, with no windows created when there are no clicks? Session Windows are dynamically managed based upon record activity.
 ## Confluent Control Center
@@ -131,7 +140,7 @@
 - Majority for Zookeeper ensemble `ensemble`.
 - default client port: `2181`
 - `ensemble` is a multiple nodes Zookeeper deployment. It  is a set of `2n + 1` nodes.
-- Number `QN = (N + 1) / 2` defines the size of `quorum` (majority rule) where `n` is the total number of servers.  `Quorum` is minimal number of server required to run the Zookeeper
+- Number `QN = (N + 1) / 2` defines the size of `quorum` (majority rule) where `n` is the total number of servers.  `Quorum` is minimal number of server required to run the Zookeeper. It is always have an odd number of servers (1, 3, 5, ...)
 - each node is called `zNode`
 - each `zNode` has a `path`
 - `zNodes` can be persisten or ephemeral
@@ -141,6 +150,11 @@
 - responsible for broker registration with heartbeat mechanism
 - elects leader in case some brokers go down
 - stores data like: `ACL`, broker registration information, controller registration
+- **tickTime:** The length of a single tick, which is the basic time unit used by ZooKeeper, as measured in milliseconds. It is used to regulate heartbeats, and timeouts.
+- **initLimit:** Amount of time, in ticks, to allow followers to **connect** and sync to a leader.
+- **syncLimit:** Amount of time, in ticks, to allow followers to sync with ZooKeeper. If followers fall too far behind a leader, they will be dropped.
+- to monitor cluster use `bin/zookeeper-shell.sh` command
+- minimum configuration defined for Zookeeper: `clientPort`, `dataDir`, `tickTime`
 
 ## Kafka Cluster
 Kafka Broker configurations such as `background.threads` can be updated in such a way that will automatically roll out the change to the entire cluster, without requiring broker restarts. Cluster-wide configurations can be updated dynamically across the whole cluster.
@@ -159,6 +173,7 @@ Kafka Broker configurations such as `background.threads` can be updated in such 
 - it is possible to report errors to `dead letter queue`. Use `errors.deadletterqueue.topic.name` and optionally `errors.deadletterqueue.context.headers.enable=true`
 - Kafka Connect can provide `exactly-once semantics` for both sink connectors and source connectors, but achieving this support requires configuring the correct worker properties in the cluster. The ability to achieve exactly-once semantics is highly dependent on the type of connector and its design. Connectors must be designed to take advantage of the capabilities of the Kafka Connect framework for exactly-once processing.
 - **Kafka Connect** supports two modes of execution: **standalone (single process)** and **distributed**. In standalone mode, all work is performed in a single process, making it simpler to set up. However, standalone mode lacks some features such as fault tolerance.
+- required configurations include `bootstrap.servers`, `key.converter`, `value.converter`. The `plugin.path` configuration specifies the location of Kafka Connect plugins and is essential for quick setups
 - Distributed vs Standalone mode??
 
 ## Kafka CLI commands
@@ -169,6 +184,7 @@ Kafka Broker configurations such as `background.threads` can be updated in such 
 	- **--under-replicated-partitions:** If set when describing topics, only show under replicated partitions.
 - to list all topics use command `./bin/kafka-topics.sh --bootstrap-server localhost:9092 --list`
 - `kafka-acls --authorizer-properties zookeeper.connect=localhost:2181 --add --allow-principal User:kafkauser --operation read --topic pageviews` - allow the user `kafkauser` to read from, but not to write to `pageviews` topic
+- `bin/kafka-configs.sh --zookeeper localhost:2181 --alter --add-config 'producer_byte_rate=10485760,consumer_byte_rate=20971520' --entity-name test_client --entity-type clients` - prodicer quota = 10MB, consumer quota = 20MB
 
 ## Sending Messages with Null
 - Value: Message is deleted.
@@ -191,6 +207,9 @@ Kafka Broker configurations such as `background.threads` can be updated in such 
 - `ksqlDB` supports exactly-once processing - see `processing.guarantees` setting
 - when running a query against `topic` with multiple partitions, only the `ksqlDB` servers corresponding to the number of partitions perform the work, while the idle servers have minimal resource impact
 - `ksqlDB` has a limitation in that it **doesn't support structured keys**, preventing the creation of a stream from a windowed aggregate
+- use `ksql> exit` command and then `confluent stop ksql` (if Confluent CLI is in use) to to exit `ksqlDB`
+- following queries read/write data to Kafka `CREATE TABLE AS SELECT`, `COUNT`, `CREATE STREAM AS SELECT`
+- securing the `ksqlDB` **command topic ensures that sensitive metadata related to DDL statements and query termination is protected**. This is particularly important for managing and controlling access to ksqlDB operations.
 
 ## Controller
 - Elected by Zookeeper ensemble.
@@ -241,13 +260,14 @@ Kafka Broker configurations such as `background.threads` can be updated in such 
 - Definition of GlobalKtable and co-partitioning.
 
 ## Configuration Parameters
-1. `log.cleanup.policy`
-2. `auto.offset.rest`
-3. `max.tasks` for Kafka Connect.
-4. `key.converter.schemas.enable` and `value.converter.schemas.enable`.
-5. `enable.idempotence`.
-6. `log.retention.hours`, `log.retention.minutes`, `log.retention.ms`.
-7. `errors.log.enable`, `errors.deadletterqueue.topic.name`, `errors.deadletterqueue.context.headers.enable`
-8. The `offsets.retention.minutes` configuration in `Kafka` determines how long `Kafka` remembers offsets in a special topic. The default value is 10,080 minutes (7 days), and it affects the behavior when an application is restarted after being stopped for a while. Increasing this value is **recommended** to avoid reprocessing data on application restart due to offsets being deleted by the broker(s).
-9. `unclean.leader.election.enable=false` unclear leader election is disabled, the topic will not accept new messages until an **In-Sync Replica** becomes available for leader election. 
-10. `unclean.leader.election.enable=true` one of the out-of sync replicas can be elected as a new leader.
+1. `log.cleanup.policy=delete(default), cleanup, both`
+2. `records-lag-max` maximum lag in terms of number of records for any partition
+3. `auto.offset.rest`
+4. `max.tasks` for Kafka Connect.
+5. `key.converter.schemas.enable` and `value.converter.schemas.enable`.
+6. `enable.idempotence`.
+7. `log.retention.hours`, `log.retention.minutes`, `log.retention.ms`.
+8. `errors.log.enable`, `errors.deadletterqueue.topic.name`, `errors.deadletterqueue.context.headers.enable`
+9. The `offsets.retention.minutes` configuration in `Kafka` determines how long `Kafka` remembers offsets in a special topic. The default value is 10,080 minutes (7 days), and it affects the behavior when an application is restarted after being stopped for a while. Increasing this value is **recommended** to avoid reprocessing data on application restart due to offsets being deleted by the broker(s).
+10. `unclean.leader.election.enable=false` unclear leader election is disabled, the topic will not accept new messages until an **In-Sync Replica** becomes available for leader election. 
+11. `unclean.leader.election.enable=true` one of the out-of sync replicas can be elected as a new leader.
