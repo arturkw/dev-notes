@@ -22,10 +22,9 @@
 - `records-lag-max`: Current lag (number of messages behind the broker)
 - `UnderReplicatedPartitions` means that data is not being replicated to enough number of brokers
 - `bytes-consumed-rate` average number of bytes per second
-- `request-latency-avg` ???
+- `request-latency-avg` the average request latency in ms
 - `response-rate` measures the number of acknowledgments per second
-- `io-wait-time-ns-avg`
-- `records-consumed-rate`
+- `records-consumed-rate` the average number of records consumed per second.
 
 ## Java API
 - `producer.send()`: Returns `Future<RecordMetadata>`.
@@ -40,7 +39,6 @@
 ## Avro
 - Avro provides a language for defining schemas and using them to serialize and deserialize data.
 - `SpecificRecords` are generated from Avro Schema using Maven/Gradle plugin.
-- Schema evolution: `forward`, `backward`, `breaking ??
 - Schema registry resides as a separate JVM component.
 - primitive types: `bytes`, `string`, `null`, `boolean`, `int`, `long`, `float`, `double`
 - required fields: `fields`, `name`
@@ -49,7 +47,8 @@
 - set serialization format by setting `ksql.format=avro,protobuff,json`
 
 ## Schemas compatibility types
-- `FORWARD` or `FORWARD_TRANSITIVE` schema evolution: There is no assurance that consumers using the new schema can read data produced using older schemas.
+- `BACKWARD` compatibility means that consumers using the new schema can read data produced with the last schema. Delete fields and add optional fields are possible. Update consumers firsts.
+- `FORWARD` compatibility means that data produced with a new schema can be read by consumers using the last schema, even though they may not be able to use the full capabilities of the new schema. Add fields and delete optional fields are possible. Update producers first.
 
 ## Consumer
 - when a `consumer` wants to join a group, it sends a `JoinGroup` request to the `group coordinator` 
