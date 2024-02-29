@@ -37,3 +37,22 @@ latch.await();
 - VT are configured via `jdk.virtualThreadScheduler.parallelism` and `jdk.virtualThreads.maxPoolSize`
 - pinning VT: thread can not be unmounted from its carrier if executes **synchronized** method/blocks or native functions. Use **Locks** for resource synchronization if possible.
 - use `jdk.tracePinnedThreads=full` to trace pinned threads
+- virtual thread executor may be used as an executor in **CompletrableFuture**
+- `InheritableThreadLocal` allows to get parent thread local values in child thread. If child thread modifies value, parent thread still has it's own copy. It is a problem for virtual threads - large number of VT may suffer poor performance when child threads midify value (it leads to huge number of copy-clone refernce)
+- Use `ScopedValue` instead of `ThreadLocal` and `InheritableThreadLocal`
+- `StructuredTaskScope` convinient for case when a failing subtask should cancel parallel subtask execution (**shutdownOnFailure()**, **shutdownOnSuccess()**)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

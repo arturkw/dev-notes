@@ -270,3 +270,55 @@ Kafka Broker configurations such as `background.threads` can be updated in such 
 9. The `offsets.retention.minutes` configuration in `Kafka` determines how long `Kafka` remembers offsets in a special topic. The default value is 10,080 minutes (7 days), and it affects the behavior when an application is restarted after being stopped for a while. Increasing this value is **recommended** to avoid reprocessing data on application restart due to offsets being deleted by the broker(s).
 10. `unclean.leader.election.enable=false` unclear leader election is disabled, the topic will not accept new messages until an **In-Sync Replica** becomes available for leader election. 
 11. `unclean.leader.election.enable=true` one of the out-of sync replicas can be elected as a new leader.
+
+## Broker configuration
+1. `broker.id` every Kafka broker must have an integer identifier.
+2. `port` if port lower than 1024 broker must be run as root
+3. `zookeeper.connect` Zookeeper  host
+4. `log.dirs` list of paths to store messages
+5. `auto.create.topics.enable` create topics when producer starts write messages, consumer starts read messages, client request topic metadata
+
+## Topic configuration
+1. `num.partitions` determines how many partitions a new topic is created with
+2. `log.retention.ms` how long retain messages
+3. `log.retention.minutes`
+4. `log.retention.hours` default value is 168 (one week), the smaler value from all `log.retention.` is choosen
+5. `log.retention.bytes` applied per partition
+6. `log.segment.bytes` default is 1GB
+7. `log.segment.ms`
+8. `message.max.bytes` defeault is 1MB
+
+## Producer
+`fire-and-forget` we send a message to the server and don't really care it it arrives or not. Some messages will get lost.
+`synchronous send` we send a message, the `send()` method returns `Future` amd we use `get()` to wait on the future ans see it it was successful or not
+`asynchronous send` we call the `send()` method with a callback function which gets triggered when it receives a response from the Kafka broker. Callback function must implement `org.apache.kafka.clients.producer.Callback` interface which has a single function `onCompletion(RecordMetadata rm, Exception e)`
+
+## Producer configuration
+1. `bootstrap.servers` list of `host:port` pairs of brokers. MANDATORY
+2. `key.serializer` name of class that will be used to serialize keys. Commons are `ByteArraySerializer`, `IntegerSerializer`, `StringSerializer`. Custom serializer must implement `org.apache.kafka.common.serialization.Serializer` interface. MANDATORY
+3. `value.serializer` name of the class that will be used to serialize the values of the record. MANDATORY
+4. `acks=0,1,all`
+5. `buffer.memory` this sets the amount of memory the producer will use to buffer messages waiting to be sent to brokers
+6. `compression.type` By default, messages are sent uncompressed. This parameter can be set to snappy, gzip, or lz4, in which case the corresponding compression algorithms will be used to compress the data before sending it to the brokers.
+7. `retries`
+8. `batch.size`
+9. `linger.ms` linger.ms controls the amount of time to wait for additional messages before sending the current batch
+10. `client.id` any string, used in logs,metrics and for quota
+11. `max.in.flight.requests.per.connection` how many resposnes can be send to the server without receiving responses. If set to 1 will guarantee that messages will be written in order.
+12. `timeout.ms, request.timeout.ms, and metadata.fetch.timeout.ms`
+13. `max.block.ms` how long the producer will block when calling `send()`
+14. `max.request.size`
+
+## Consumer configuration
+1. `fetch.min.bytes`
+2. `fetch.max.wait.ms`
+3. `fetch.max.wait.ms`
+4. `max.partition.fetch.bytes`
+5. `session.timeout.ms`
+6. `auto.offset.reset`
+7. `enable.auto.commit`
+8. `partition.assignment.strategy`
+9. `client.id`
+10. `max.poll.records`
+11. `receiver.buffer.bytes.`, `send.buffer.bytes`
+12. 
