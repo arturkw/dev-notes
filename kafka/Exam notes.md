@@ -321,4 +321,3 @@ Kafka Broker configurations such as `background.threads` can be updated in such 
 9. `client.id`
 10. `max.poll.records`
 11. `receiver.buffer.bytes.`, `send.buffer.bytes`
-12. 
