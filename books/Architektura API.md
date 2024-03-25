@@ -31,6 +31,9 @@ Dobre `REST API` pozwala na:
 4. Monitorowanie (czas odpowiedzi, jakie API wywoływano, błędne requesty)
 5. Translacja protokołów
 
+## Infrastruktura typu service mesh
+Service mesh to infrastruktura służąca do zarządzania komunikacją pomiędzy usługami (komunikacja wschód-zachód) w ramach rozproszonego systemu oprogramowania. Service mesh zapewnia obsługę zadań takich jak weryfikacja użytkownika, monitoring, ograniczenie liczby żądań, zdefiniowanie przekroczenia czasu oczekiwania oraz liczby powtórzeń. 
+
 
 
 
