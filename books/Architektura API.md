@@ -34,6 +34,11 @@ Dobre `REST API` pozwala na:
 ## Infrastruktura typu service mesh
 Service mesh to infrastruktura służąca do zarządzania komunikacją pomiędzy usługami (komunikacja wschód-zachód) w ramach rozproszonego systemu oprogramowania. Service mesh zapewnia obsługę zadań takich jak weryfikacja użytkownika, monitoring, ograniczenie liczby żądań, zdefiniowanie przekroczenia czasu oczekiwania oraz liczby powtórzeń. 
 
+## Release API
+Używaj `feature flag` ale nie tak jak tutaj: [[https://blog.statsig.com/how-to-lose-half-a-billion-dollars-with-bad-feature-flags-ccebb26adeec]]
+Monitorowanie (logi, event tracing) jest przydatne w procesie releasu - można wykryć błędy :) To wszystko zostało opisane w tym rozdziale na przestrzeni "zaledwie" 20 stron :) 
+
+
 
 
 

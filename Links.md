@@ -7,4 +7,6 @@ TDD: Sztuka tworzenia dobrego kodu
 Frameworki:
 https://pact.io
 https://netflix.github.io
+https://opentelemetry.io
+
 
