@@ -1,0 +1,3 @@
+This is my personal tech blog. 
+From time to time I add some notes here....
+I recommend Obsidian APP to read and create MD files..
