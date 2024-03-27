@@ -38,6 +38,34 @@ Service mesh to infrastruktura służąca do zarządzania komunikacją pomiędzy
 Używaj `feature flag` ale nie tak jak tutaj: [[https://blog.statsig.com/how-to-lose-half-a-billion-dollars-with-bad-feature-flags-ccebb26adeec]]
 Monitorowanie (logi, event tracing) jest przydatne w procesie releasu - można wykryć błędy :) To wszystko zostało opisane w tym rozdziale na przestrzeni "zaledwie" 20 stron :) 
 
+## Bezpieczeństwo operacyjne - model zagrożeń dla API
+- błędem jest skupianie się przez architektów i programistów wyłącznie na dostarczaniu wartości biznesowej w pierwszym etapie pracy nad projektem i zostawianie problemów związanych z bezpieczeństwem aż do zakończenia prac: ostatecznie zwiększa to koszty. 
+- podstawą do oceny zagrożeń może być `OWASP API Security Top 10` https://owasp.org/www-project-api-security/ 
+- średni koszt włamania do firmy notowanej na giełdzie wyniósł **116.000.000$**
+- **modelowanie zagrożeń** to technika pomagająca w identyfikowaniu zagrożeń, ataków, luk w zabezpieczeniach oraz innych środków, które mogą mieć wpływ na aplikację
+- **Diagramy przepływu danych** (data flow diagrams, DFD) ułatwia sprawdzenie jak dane przepływają przez system
+### Modelowanie zagrożeń
+1. Określ cele: cele dotyczące bezpieczeństwa są często celami biznesowymi np: *uniknij wycieku danych i kary związanej z RODO.*
+2. Zbierz informacje i rozłóż system na czynniki: stwórz diagram przepływu danych 
+3. Określ zagrożenia np przy użyciu metody **STRIDE**
+4. Oceń ryzyko związane z zagrożeniami - możesz użyć metody **DREAD**
+5. Przeprowadź weryfikację - czy cele związane z bezpieczeństwem zostały zapewnione?
+### Metoda STRIDE
+1. Spoofing - podszywanie się pod użytkownika
+2. Tampering - modyfikowanie danych użytkownika
+3. Repudiation - niezaufany użytkownik przeprowadzający niedozwoloną operację
+4. Information disclosure - ujawnienie informacji, np odczytanie pliku do którego użytkownik nie powinien mieć dostępu
+5. Denial of Service - tymczasowa niedostępność systemu spowodowana jego celowym przeciążeniem
+6. Elevation of privilege - podniesienie uprawnień
+### Metoda DREAD
+1. Damage - jak niszczycielski jest atak
+2. Reproducibility - czy atak jest łatwy do odtworzenia
+3. Exploitability - jak łatwo można przygotować zakończony sukcesem atak
+4. Affected Users - jak duża jest potencjalna grupa ofiar ataku
+5. Discoverability - jakie jest prawdopodobieństwo odkrycia danego zagrożenia
+
+
+
 
 
 
