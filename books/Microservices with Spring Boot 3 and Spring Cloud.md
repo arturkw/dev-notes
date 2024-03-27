@@ -72,5 +72,14 @@ Monitor service collects metrics about hardware resource usage for each microser
 - provides APIs and UI for querying and analyzing the collected metrics
 - it must be possible to define alerts that are triggered when a specific metric exceeds a threshold value
 
+## Docker vs VMs
+Containers:
+- processed in a Linux host that uses Linux namespaces to provide isolation between containers
+- Linux Control Groups are used to limit the amount of CPU and memory that a container is allowed to consume
+VMs:
+- uses a hypervisor to run a complete copy of an operating system in each virtual machine
+- overhead in a container is a fraction of the overhead in a virtual machine
+- slower startup and higher footprint 
+- safer than containers
 
 
