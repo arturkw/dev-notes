@@ -82,4 +82,8 @@ VMs:
 - slower startup and higher footprint 
 - safer than containers
 
+## Adding an API description using OpenAPI
+1. Good and easily accessible documentation is an important part of whether an API is useful.
+2. Many of the leading API gateways have native support for the OpenAPI Specification.
+3. 
 
