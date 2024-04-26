@@ -6,10 +6,10 @@ Bytecode is executed by the JVM. Compiler converts java code into bytecode which
 JIT compiles bytecode into the machine code that can be run by the processor. It runs complex optimizations to generate efficient machine code. There are two JIT compilers: C1 and C2. C1 is designed to run faster and produces less optimized code. C2 produces a better optimized code but it takes more time. Compiled code is stored in code cache.
 
 Useful flags:
--XX:+UnlockDiagnosticVMOptions
--XX:+LogCompilation
--XX:+PrintCompilation
--XX:+PrintCodeCache
+- -XX:+UnlockDiagnosticVMOptions
+- -XX:+LogCompilation
+- -XX:+PrintCompilation
+- -XX:+PrintCodeCache
 
 Links:
 - [Chapter 6. The Java Virtual Machine Instruction Set (oracle.com)](https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-6.html)
