@@ -10,6 +10,28 @@ Useful flags:
 - -XX:+LogCompilation
 - -XX:+PrintCompilation
 - -XX:+PrintCodeCache
+- -client - use client compiler only
+- -server - use server compiler
+- -d64 - user 64 bit server compiler
+- -XX:-TieredCompilation - disable tiered compilation
+- -XX:+PrintFlagsFinal
+- -XX:CompileThreshold=1000
+
+Useful commands:
+- jinfo -flag CICompilerCount pid
+- jps
+
+32 bit JVM:
+- might be faster if heap < 3GB
+- Max heap size = 4GB
+- Client compiler only
+
+64 bit JVM:
+- Might be faster if using long/double
+- Necessary if heap > 4GB
+- Max heap size - OS dependent
+- Client & server compilers
+
 
 Links:
 - [Chapter 6. The Java Virtual Machine Instruction Set (oracle.com)](https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-6.html)
