@@ -32,6 +32,18 @@ Useful commands:
 - Max heap size - OS dependent
 - Client & server compilers
 
+# The heap and the stack
+
+Stack:
+- every thread has its own stack
+- new data is pushed on the top
+- data is popped from the top
+- for storing local primitives 
+- pointer (reference) to complex objects
+
+Heap:
+- stores complex objects
+- is shared between all the threads
 
 Links:
 - [Chapter 6. The Java Virtual Machine Instruction Set (oracle.com)](https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-6.html)
