@@ -45,6 +45,37 @@ Heap:
 - stores complex objects
 - is shared between all the threads
 
+# Metaspace
+
+Metaspace stores information about classes, methods and static variables (static primitives and references, static objects are stored on the heap). Object in the Metaspace will be never garbage collected. 
+
+# String Pool
+
+`Integer i = 76;`
+`String one = i.toString();`
+`String two = "76";`
+`System.out.println(one.equals(two));  //true`
+`System.out.println(one == two);  //false`
+`System.out.println(one == two.intern());  //true!`
+
+String Pool lives in the heap since Java 7.
+SP is implemented as HashMap.
+
+
+Useful flags:
+- -XX:+PrintStringTableStatistics
+- -XX:StringTableSize= - number of buckets 
+- -XX:MaxHeapSize=
+- -XX:InitialHeapSize=
+
+# JVisualVM and Heap Dump
+
+Soft leak - when an object remains referenced when no longer needed.
+
+Useful flaggs:
+-XX:+HeapDumpOnOutOfMemoryError
+-XX:HeapDumpPath=
+
 Links:
 - [Chapter 6. The Java Virtual Machine Instruction Set (oracle.com)](https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-6.html)
 - [Java Virtual Machine Technology Overview (oracle.com)](https://docs.oracle.com/en/java/javase/21/vm/java-virtual-machine-technology-overview.html#GUID-982B244A-9B01-479A-8651-CB6475019281)
